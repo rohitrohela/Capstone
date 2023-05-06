@@ -9,3 +9,4 @@ python-jose
 PyJWT==2.6.0
 jose==1.0.0
 gunicorn
+psycopg2-binary==2.9.6
