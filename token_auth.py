@@ -41,7 +41,7 @@ def getToken(userName, password):
     parameter = {
         'client_id': os.getenv('CLIENT_ID'),
         'client_secret': os.getenv('CLIENT_SECRET'),
-        'audience': 'CapestoneFinal',
+        'audience': os.getenv('API_AUDIENCE'),
         'grant_type': 'password',
         "username": userName,
         "password": password,

@@ -5,9 +5,9 @@ from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
 
-AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN') #'dev-hlhz1lj0edkt8z33.us.auth0.com'
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
 ALGORITHMS = ['RS256']
-API_AUDIENCE = os.getenv('API_AUDIENCE') #'CapestoneFinal'
+API_AUDIENCE = os.getenv('API_AUDIENCE')
 
 
 class AuthError(Exception):
