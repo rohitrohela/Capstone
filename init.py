@@ -8,12 +8,14 @@ import dateutil.parser
 import datetime
 from babel.dates import format_date, format_datetime, format_time
 import dateutil.utils
+from auth import requires_auth, AuthError
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:abc@localhost:5432/example
     if test_config is None:
         app.config.from_object('config-prod')
     else:
@@ -21,7 +23,10 @@ def create_app(test_config=None):
 
     #db = SQLAlchemy(app)
     db.init_app(app)
-    migrate = Migrate(app, db)
+    # migrate = Migrate(app, db)
+
+    with app.app_context():
+        db.create_all()
 
     CORS(app, resources={r"*": {"origins": '*'}})
 
@@ -42,34 +47,42 @@ def create_app(test_config=None):
         return "Hello Python"
 
     def format_dt(value, format='medium'):
-        date = dateutil.parser.parse(value)
-        if format == 'full':
-            format = "EEEE MMMM, d, y 'at' h:mma"
-        elif format == 'medium':
-            format = "EE MM, dd, y h:mma"
-        return format_datetime(date, format, locale='en')
+        try:
+            date = dateutil.parser.parse(value)
+            if format == 'full':
+                format = "EEEE MMMM, d, y 'at' h:mma"
+            elif format == 'medium':
+                format = "EE MM, dd, y h:mma"
+            return format_datetime(date, format, locale='en')
+        except Exception as e:
+            abort(422, 'Date format is not correct')
 
+    @app.route("/movie/<int:movie_id>", methods=["GET"])
+    @requires_auth('read:movie')
+    def get_movies(jwt, movie_id):
+        movie = Movie.query.filter_by(id=movie_id).one_or_none()
 
-    @app.route("/movies", methods=["GET"])
-    def get_movies():
-        all_movies = [movie.format() for movie in Movie.query.all()]
+        if movie is None:
+            raise abort(404, "No Movie Found")
 
         return jsonify(
             {
                 "success": True,
-                "movies": all_movies,
+                "movie": movie.format(),
             }
         )
 
     @app.route("/movie", methods=["POST"])
-    def save_movie():
+    @requires_auth('add:movie')
+    def save_movie(jwt):
         req = request.get_json()
         success = True
-        movie_id=-1
+        movie_id = -1
+        rel_date = format_dt(req['release_date'])
         try:
             movie = Movie(
                 title=req['title'],
-                release_date=format_dt(req['release_date'])
+                release_date=rel_date
             )
             movie.insert()
             movie_id = movie.id
@@ -85,8 +98,41 @@ def create_app(test_config=None):
             }
         )
 
+    @app.route("/movie/<int:movie_id>", methods=["PATCH"])
+    @requires_auth('edit:movie')
+    def patch_movie(jwt, movie_id):
+        success = True
+        recordUpdated = 0
+
+        movie = Movie.query.filter_by(id=movie_id).one_or_none()
+        if movie is None:
+            abort(404, 'No Movie Found')
+
+        try:
+            body = request.get_json()
+            if 'title' in body:
+                movie.title = body['title']
+
+            if 'release_date' in body:
+                movie.release_date = format_dt(body['release_date'])
+
+            movie.update()
+            recordUpdated = 1
+        except Exception as e:
+            db.session.rollback()
+            success = False
+        finally:
+            db.session.close()
+        return jsonify(
+            {
+                "success": success,
+                "recordUpdated": recordUpdated
+            }
+        )
+
     @app.route("/movie/<int:movie_id>", methods=["DELETE"])
-    def delete_movie(movie_id):
+    @requires_auth('delete:movie')
+    def delete_movie(jwt, movie_id):
         success = True
         recordDeleted = 0
         try:
@@ -108,19 +154,24 @@ def create_app(test_config=None):
             }
         )
 
-    @app.route("/actor", methods=["GET"])
-    def get_actor():
-        all_actors = [actor.format() for actor in Actor.query.all()]
+    @app.route("/actor/<int:actor_id>", methods=["GET"])
+    @requires_auth('read:actor')
+    def get_actor(jwt, actor_id):
+        actor = Actor.query.filter_by(id=actor_id).one_or_none()
+
+        if actor is None:
+            raise abort(404, "No Actor Found")
 
         return jsonify(
             {
                 "success": True,
-                "actors": all_actors,
+                "actor": actor.format()
             }
         )
 
     @app.route("/actor", methods=["POST"])
-    def save_actor():
+    @requires_auth('add:actor')
+    def save_actor(jwt):
         req = request.get_json()
         success = True
         actor_id = -1
@@ -144,8 +195,42 @@ def create_app(test_config=None):
             }
         )
 
+    @app.route("/actor/<int:actor_id>", methods=["PATCH"])
+    @requires_auth('edit:actor')
+    def patch_actor(jwt, actor_id):
+        success = True
+        recordPatched = 0
+
+        actor = Actor.query.filter_by(id=actor_id).one_or_none()
+        if actor is None:
+            raise abort(404, "No actor Found")
+        try:
+            body = request.get_json()
+            if 'name' in body:
+                actor.name = body['name']
+            if 'age' in body:
+                actor.age = body['age']
+            if 'gender' in body:
+                actor.gender = body['gender']
+
+            actor.update()
+            recordPatched = 1
+
+        except Exception as e:
+            db.session.rollback()
+            success = False
+        finally:
+            db.session.close()
+        return jsonify(
+            {
+                "success": success,
+                "recordPatched": recordPatched
+            }
+        )
+
     @app.route("/actor/<int:actor_id>", methods=["DELETE"])
-    def delete_actor(actor_id):
+    @requires_auth('delete:actor')
+    def delete_actor(jwt, actor_id):
         success = True
         recordDeleted = 0
         try:
@@ -154,7 +239,7 @@ def create_app(test_config=None):
                 actor.delete()
                 recordDeleted = 1
             else:
-                success = False
+                raise abort(404, "No Actor Found")
         except Exception as e:
             db.session.rollback()
             success = False
@@ -176,6 +261,24 @@ def create_app(test_config=None):
             "description": error.description,
         }), 422
 
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": "internal server error",
+            "description": error.description,
+        }), 500
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request",
+            "description": error.description,
+        }), 400
+
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
@@ -185,13 +288,13 @@ def create_app(test_config=None):
             "description": error.description
         }), 404
 
-    # @app.errorhandler(AuthError)
-    # def handle_error(error):
-    #     return jsonify({
-    #         "success": False,
-    #         "error": error.status_code,
-    #         "message": error.error,
-    #     }), error.status_code
+    @app.errorhandler(AuthError)
+    def handle_error(error):
+        return jsonify({
+            "success": False,
+            "error": error.status_code,
+            "message": error.error,
+        }), error.status_code
 
     return app
 
