@@ -8,7 +8,7 @@ import os
 # DEBUG = True
 
 # Connect to the database
-database_path = os.getenv('DATABASE_URL_TEST', 'postgres://postgres:postgres@127.0.0.1:5432/postgres')
+database_path = os.getenv('DATABASE_URL_TEST', 'postgresql://postgres:postgres@127.0.0.1:5432/postgres')
 if database_path.startswith("postgres://"):
   database_path = database_path.replace("postgres://", "postgresql://", 1)
 
