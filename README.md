@@ -24,7 +24,7 @@ The project depends upon the following environment variable
 
 ## Getting Started
 
-* **Base URL:**  default, `httpp://127.0.0.1:5000/`
+* **Base URL:**  default, `https://capstone-d1ly.onrender.com/`
 * **Authentication:** You need to provide Bearer token to access the application.
 
 >## Error Handling
@@ -52,7 +52,7 @@ The API will return the following type of errors when requests fail
 * **General:** Return the detail of the movie having the supplied id.
 * **Sample request :** 
 ```commandline
-curl --location 'http://127.0.0.1:5000/movie/1' \
+curl --location 'https://capstone-d1ly.onrender.com/movie/1' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN'
 ```
 * **Sample Response**
@@ -72,7 +72,7 @@ curl --location 'http://127.0.0.1:5000/movie/1' \
 * **General:** Return newly created movie record id and success status.
 * **Sample request :** 
 ```commandline
-curl --location 'http://127.0.0.1:5000/movie' \
+curl --location 'https://capstone-d1ly.onrender.com/movie' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN' \
 --data '{
@@ -94,7 +94,7 @@ curl --location 'http://127.0.0.1:5000/movie' \
 * **General:** Return success value True or False.
 * **Sample request :** 
 ```commandline
-curl --location --request DELETE 'http://127.0.0.1:5000/movie/74' \
+curl --location --request DELETE 'https://capstone-d1ly.onrender.com/movie/74' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN' \
 --data ''
 ```
@@ -110,7 +110,7 @@ curl --location --request DELETE 'http://127.0.0.1:5000/movie/74' \
 * **General:** Return success value True or False.
 * **Sample request :** 
 ```commandline
-curl --location --request PATCH 'http://127.0.0.1:5000/movie/73' \
+curl --location --request PATCH 'https://capstone-d1ly.onrender.com/movie/73' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN' \
 --data '{
@@ -129,7 +129,7 @@ curl --location --request PATCH 'http://127.0.0.1:5000/movie/73' \
 ### `GET '/ACTOR/${id}'` : Get actor details by its id
 * **Sample request :** 
 ```commandline
-curl --location --request GET 'http://127.0.0.1:5000/actor/1' \
+curl --location --request GET 'https://capstone-d1ly.onrender.com/actor/1' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN' \
 --data '{
@@ -153,7 +153,7 @@ curl --location --request GET 'http://127.0.0.1:5000/actor/1' \
 * **General:** Return success value and newly created actor id
 * **Sample request :** 
 ```commandline
-curl --location 'http://127.0.0.1:5000/actor' \
+curl --location 'https://capstone-d1ly.onrender.com/actor' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN' \
 --data '{
@@ -174,7 +174,7 @@ curl --location 'http://127.0.0.1:5000/actor' \
 * **General:** Return success value true or false and no of record deleted
 * **Sample request :** 
 ```commandline
-curl --location --request DELETE 'http://127.0.0.1:5000/actor/73' \
+curl --location --request DELETE 'https://capstone-d1ly.onrender.com/actor/73' \
 --header 'Authorization: YOUR_BEARER_TOKEN' \
 --data ''
 ```
@@ -190,7 +190,7 @@ curl --location --request DELETE 'http://127.0.0.1:5000/actor/73' \
 * **General:** Return success value true or false and no of record patched
 * **Sample request :** 
 ```commandline
-curl --location --request PATCH 'http://127.0.0.1:5000/actor/72' \
+curl --location --request PATCH 'https://capstone-d1ly.onrender.com/actor/72' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer YOUR_BEARER_TOKEN' \
 --data '{
