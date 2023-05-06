@@ -8,8 +8,10 @@ import os
 # DEBUG = True
 
 # Connect to the database
-DB_USER = os.getenv('DATABASE_URL_TEST', 'postgresql+psycopg2://postgres:postgres@127.0.0.1:5432/postgres')
+database_path = os.getenv('DATABASE_URL_TEST', 'postgres://postgres:postgres@127.0.0.1:5432/postgres')
+if database_path.startswith("postgres://"):
+  database_path = database_path.replace("postgres://", "postgresql://", 1)
 
-SQLALCHEMY_DATABASE_URI = DB_USER
+SQLALCHEMY_DATABASE_URI = database_path
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
